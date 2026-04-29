@@ -255,10 +255,11 @@ const App = () => {
   const phaseEmoji: Record<number, string> = { 1: '', 2: '🫁 ', 3: '🧠 ', 4: '🫀 ', 5: '' };
 
   const getSlotClassName = (index: number) => {
-    const base = "absolute flex items-center justify-center text-[10px] sm:text-sm md:text-base lg:text-lg font-black rounded-md cursor-pointer transition-colors z-10";
-    if (cardInputs[index]) return `${base} bg-fuchsia-100 text-fuchsia-800 border sm:border-2 border-fuchsia-400`;
-    if (selectedWord) return `${base} bg-fuchsia-50/80 border sm:border-2 border-dashed border-fuchsia-400 animate-pulse`;
-    return `${base} bg-white/20 border sm:border-2 border-dashed border-white/50 hover:bg-white/30`;
+    // 텍스트 크기와 상자 여백을 기기에 맞게 적절히 조절
+    const base = "absolute flex items-center justify-center text-[11px] sm:text-sm md:text-base font-black rounded-md cursor-pointer transition-colors z-10 px-1";
+    if (cardInputs[index]) return `${base} bg-fuchsia-100 text-fuchsia-800 border-2 border-fuchsia-400 shadow-sm`;
+    if (selectedWord) return `${base} bg-fuchsia-50/80 border-2 border-dashed border-fuchsia-400 animate-pulse`;
+    return `${base} bg-white/40 border-2 border-dashed border-white/70 hover:bg-white/60`; // 살짝 반투명하게 하얀색을 띄워 인지하기 쉽게 함
   };
 
   const renderHeader = (phaseLabel: string, showClock = true, timeToDisplay: Date | null = currentTime) => (
@@ -326,8 +327,7 @@ const App = () => {
               <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 sm:p-6 flex flex-col items-center animate-in fade-in zoom-in duration-500 shadow-inner">
                 <Check className="w-12 h-12 sm:w-16 sm:h-16 text-emerald-500 mb-2 sm:mb-3 animate-bounce" />
                 <p className="font-black text-2xl sm:text-3xl text-emerald-700 mb-1">🎉 미션 완벽 완수! 🎉</p>
-                <p className="font-bold text-sm sm:text-base text-emerald-600 mb-4">최종 기록 제출이 완료되었습니다.</p>
-                <p className="text-xs sm:text-sm text-emerald-600 font-bold bg-white px-4 py-2 rounded-full border border-emerald-200 shadow-sm">선생님께 이 화면을 보여주세요!</p>
+                <p className="font-bold text-sm sm:text-base text-emerald-600 mb-2">최종 기록 제출이 완료되었습니다.</p>
               </div>
             )}
           </div>
@@ -404,7 +404,7 @@ const App = () => {
               <span>{phaseEmoji[3]}3단계 MISSION</span>
             </div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-orange-500">2단계 미션 성공!</h2>
-            <p className="text-slate-600 font-bold text-xs sm:text-base break-keep">단서를 종합하여 아래의 물리 버튼 자물쇠를 해제하세요.</p>
+            <p className="text-slate-600 font-bold text-xs sm:text-base break-keep">단서를 종합하여 자물쇠를 해제하세요.</p>
           </div>
           
           <div className="w-full max-w-xs sm:max-w-sm mt-6 sm:mt-12 animate-in fade-in slide-in-from-bottom-8 relative pb-8">
