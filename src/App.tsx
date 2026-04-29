@@ -21,26 +21,30 @@ const App = () => {
   const [completionTime, setCompletionTime] = useState<Date | null>(null); 
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   
+  // 1단계 상태 관리
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [recognizedNumber, setRecognizedNumber] = useState<string | null>(null);
+  const [userCode, setUserCode] = useState<string>(''); // 사용자가 사진 찍은 후 직접 입력할 코드
   const [phase1Status, setPhase1Status] = useState<'idle' | 'fail'>('idle');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 2단계 상태 관리
   const [doorLockInput, setDoorLockInput] = useState<string>('');
   const [doorLockError, setDoorLockError] = useState<boolean>(false);
 
+  // 3단계 상태 관리
   const [padlockInput, setPadlockInput] = useState<string>('');
   const [padlockError, setPadlockError] = useState<boolean>(false);
 
+  // 4단계 상태 관리
   const [cardInputs, setCardInputs] = useState<string[]>(['', '', '', '', '']);
   const [phase4Error, setPhase4Error] = useState<boolean>(false);
   const [selectedWord, setSelectedWord] = useState<string | null>(null); 
-  
   const [draggedWord, setDraggedWord] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // 5단계 상태 관리
   const [teamName, setTeamName] = useState<string>('');
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle'); 
 
@@ -82,60 +86,28 @@ const App = () => {
           setImageBase64(result.split(',')[1]);
           setImagePreview(result);
         }
-        setRecognizedNumber(null);
         setPhase1Status('idle');
+        setUserCode(''); // 사진을 새로 찍으면 입력칸 초기화
       };
       reader.readAsDataURL(file);
     }
   };
 
   const analyzeImage = async () => {
-    if (!imageBase64) return;
+    if (!imageBase64 || userCode.length !== 4) return;
     setIsProcessing(true);
     setPhase1Status('idle');
-    setRecognizedNumber(null);
 
-    const apiKey = ""; 
-    // 프롬프트 대폭 강화: 배경 무시, 어떠한 형태든 숫자를 찾으라고 지시
-    const prompt = "이 사진에서 학생들이 작성한, 혹은 조합한 4자리 숫자를 반드시 찾아주세요. 7세그먼트(전자시계 모양), 손글씨, 거꾸로 된 글씨 등 형태에 상관없이 찾아야 합니다. 주변 배경, 빛 번짐, 다른 글자는 모두 무시하고, 사진 중앙에 위치한 핵심 숫자 4자리만 읽어주세요.";
-    const payload = { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] }] };
+    // 시스템이 검사하는 듯한 몰입감을 주기 위한 가짜 딜레이 (1.2초)
+    await new Promise(resolve => setTimeout(resolve, 1200));
 
-    try {
-      let attempt = 0;
-      let result: any = null;
-      while (attempt < 5) {
-        try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-          });
-          if (!response.ok) throw new Error('API failed');
-          result = await response.json();
-          break;
-        } catch (err) {
-          attempt++;
-          if (attempt >= 5) throw err;
-          await new Promise(r => setTimeout(r, [1000, 2000, 4000, 8000, 16000][attempt - 1]));
-        }
-      }
-
-      // 결과값 처리 로직 강화: AI의 응답에서 숫자만 모두 추출
-      const aiResponseText = result?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      const extractedNumbers = aiResponseText.match(/\d+/g)?.join('') || "";
-      
-      setRecognizedNumber(extractedNumbers || "숫자 판독 실패");
-      
-      // 추출된 숫자에 정답(6351)이 '포함'되어 있기만 해도 정답 처리 (예: "결과는 6351입니다" -> "6351" 통과)
-      if (extractedNumbers.includes(PHASE1_TARGET)) {
-        setCurrentTime(new Date());
-        setCurrentPhase(2);
-      } else {
-        setPhase1Status('fail');
-      }
-    } catch {
-      setRecognizedNumber("오류 발생");
+    setIsProcessing(false);
+    
+    if (userCode === PHASE1_TARGET) {
+      setCurrentTime(new Date());
+      setCurrentPhase(2);
+    } else {
       setPhase1Status('fail');
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -487,7 +459,7 @@ const App = () => {
     }
 
     // ------------------------------------------
-    // [1단계] 초기화면 (스캐너)
+    // [1단계] 초기화면 (스캐너) - 수정된 버전
     // ------------------------------------------
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-4 pt-20 space-y-6 w-full max-w-md mx-auto h-full overflow-y-auto">
@@ -496,15 +468,13 @@ const App = () => {
             <span>1단계 MISSION</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-blue-600 drop-shadow-sm mb-1 sm:mb-2">BODY ESCAPE</h1>
-          <p className="text-slate-600 font-bold text-xs sm:text-sm md:text-base break-keep">완성된 숫자 코드를 사진으로 찍어 인식시키세요.</p>
+          <p className="text-slate-600 font-bold text-xs sm:text-sm md:text-base break-keep">완성된 숫자 코드를 사진으로 찍어 인증하세요.</p>
         </div>
 
         <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 border border-slate-200 shadow-xl space-y-4 sm:space-y-6 w-full shrink-0">
           <div className="relative w-full aspect-video sm:aspect-square max-h-[30dvh] sm:max-h-none bg-slate-50 rounded-xl sm:rounded-2xl border-2 border-dashed border-blue-300 overflow-hidden flex flex-col items-center justify-center">
             {imagePreview ? (
-              <><img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-2" />
-                {isProcessing && <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10"><Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500 animate-spin mb-2 sm:mb-4" /><p className="text-blue-600 font-bold text-xs sm:text-base animate-pulse">암호 해독 중...</p></div>}
-              </>
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-2" />
             ) : (
               <div className="text-center text-slate-400 p-4 sm:p-6 flex flex-col items-center"><ScanLine className="w-12 h-12 sm:w-20 sm:h-20 mb-2 sm:mb-4 text-blue-300" /><p className="font-bold text-xs sm:text-base">카메라 버튼을 눌러 촬영</p></div>
             )}
@@ -515,8 +485,28 @@ const App = () => {
             <button onClick={() => fileInputRef.current?.click()} disabled={isProcessing} className="w-full flex items-center justify-center py-3 sm:py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl sm:rounded-2xl text-base sm:text-lg font-black transition-colors border border-slate-200 shadow-sm"><Camera className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />사진 촬영하기</button>
           </div>
 
-          <button onClick={analyzeImage} disabled={!imageBase64 || isProcessing} className={`w-full py-3 sm:py-5 rounded-xl sm:rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center transition-all ${!imageBase64 || isProcessing ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 active:scale-95'}`}>
-            {isProcessing ? '판독 진행 중...' : '비밀번호 해독하기'}
+          {/* 사진을 찍어야만 입력칸이 보이도록 설정 */}
+          {imagePreview && (
+            <div className="w-full animate-in fade-in slide-in-from-top-4 flex flex-col items-center space-y-3 pt-4 border-t-2 border-dashed border-slate-100">
+              <p className="text-xs sm:text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg">사진의 숫자를 확인하고 아래에 입력하세요.</p>
+              <input 
+                type="text" 
+                maxLength={4} 
+                inputMode="numeric"
+                value={userCode} 
+                onChange={(e) => {setUserCode(e.target.value.replace(/[^0-9]/g, '')); setPhase1Status('idle');}} 
+                className="w-[200px] border-2 border-slate-300 rounded-xl px-4 py-3 text-center font-mono text-2xl sm:text-3xl font-black focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-slate-800" 
+                placeholder="0000" 
+              />
+            </div>
+          )}
+
+          <button 
+            onClick={analyzeImage} 
+            disabled={!imageBase64 || userCode.length !== 4 || isProcessing} 
+            className={`w-full py-3 sm:py-5 rounded-xl sm:rounded-2xl font-black text-lg sm:text-xl flex items-center justify-center transition-all ${(!imageBase64 || userCode.length !== 4 || isProcessing) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 active:scale-95'}`}
+          >
+            {isProcessing ? <><Loader2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 animate-spin" /> 판독 진행 중...</> : '비밀번호 해독하기'}
           </button>
         </div>
 
@@ -525,10 +515,9 @@ const App = () => {
             <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3">
               <XCircle className="w-10 h-10 sm:w-16 sm:h-16 text-red-500 mb-1 sm:mb-2" />
               <h2 className="text-xl sm:text-2xl font-black text-red-600">접근 거부</h2>
-              <p className="text-red-500/80 font-bold text-sm sm:text-base">인식 코드: <span className="font-mono text-lg sm:text-xl text-red-700 bg-red-100 px-2 py-1 rounded-md sm:rounded-lg border border-red-200 ml-1">{recognizedNumber || '없음'}</span></p>
+              <p className="text-red-500/80 font-bold text-sm sm:text-base">입력 코드: <span className="font-mono text-lg sm:text-xl text-red-700 bg-red-100 px-2 py-1 rounded-md sm:rounded-lg border border-red-200 ml-1">{userCode}</span></p>
               <p className="text-xs sm:text-sm font-bold mt-1">올바른 비밀번호가 아닙니다.</p>
             </div>
-            <button onClick={() => {setImagePreview(null); setImageBase64(null); setRecognizedNumber(null); setPhase1Status('idle'); if(fileInputRef.current) fileInputRef.current.value = '';}} className="w-full mt-4 sm:mt-6 py-3 sm:py-4 rounded-lg sm:rounded-xl font-bold bg-red-500 hover:bg-red-400 text-white shadow-md shadow-red-500/20 active:scale-95 transition-all text-sm sm:text-base">재촬영 하기</button>
           </div>
         )}
       </div>
