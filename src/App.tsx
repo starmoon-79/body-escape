@@ -380,9 +380,9 @@ const App = () => {
 
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] shadow-[0_10px_30px_rgba(33,44,102,0.3)] rounded-xl overflow-hidden border-[3px] sm:border-4 border-[#212c66] bg-[#3a478b]">
                <img src="2.png" alt="소순환(폐순환)" className="w-full h-auto block" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/312e81/ffffff?text=Image+2.png'; }} />
-               {/* 2번 이미지 (소순환) 위치, 크기 완벽 조정: 너비 28%, 높이 15%로 늘려 배경 점선을 완전히 덮음 */}
+               {/* 2번 이미지 (소순환) 위치, 크기 완벽 조정: 너비 28%, 높이 15%로 늘려 배경 점선을 완전히 덮음, 폐정맥(index:3)만 왼쪽으로 이동 */}
                <div data-slot-index="2" onDrop={(e) => handleDrop(e, 2)} onDragOver={handleDragOver} onClick={() => handleSlotClick(2)} className={`${getSlotClassName(2)} top-[40%] left-[41%] w-[28%] h-[15%]`}>{cardInputs[2]}</div>
-               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[71%] left-[26%] w-[28%] h-[15%]`}>{cardInputs[3]}</div>
+               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[71%] left-[22%] w-[28%] h-[15%]`}>{cardInputs[3]}</div>
                <div data-slot-index="4" onDrop={(e) => handleDrop(e, 4)} onDragOver={handleDragOver} onClick={() => handleSlotClick(4)} className={`${getSlotClassName(4)} top-[71%] left-[61%] w-[28%] h-[15%]`}>{cardInputs[4]}</div>
             </div>
           </div>
