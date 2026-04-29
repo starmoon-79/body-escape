@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Camera,
   XCircle,
@@ -30,55 +30,59 @@ const App = () => {
     'https://script.google.com/macros/s/AKfycbw-wxUY59QDrWX6JOAB-Ln31cNOpNBw9sWqxJOJY_U1RCy4qraEr7IZMi6EQCIbPEpoiw/exec';
 
   // ==========================================
-  // 상태 관리
+  // 상태 관리 (TypeScript 타입 명시)
   // ==========================================
-  const [currentPhase, setCurrentPhase] = useState(1);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [completionTime, setCompletionTime] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState<number>(1);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [completionTime, setCompletionTime] = useState<Date | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageBase64, setImageBase64] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [recognizedNumber, setRecognizedNumber] = useState(null);
-  const [phase1Status, setPhase1Status] = useState('idle');
-  const fileInputRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [recognizedNumber, setRecognizedNumber] = useState<string | null>(null);
+  const [phase1Status, setPhase1Status] = useState<'idle' | 'fail'>('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [doorLockInput, setDoorLockInput] = useState('');
-  const [doorLockError, setDoorLockError] = useState(false);
+  const [doorLockInput, setDoorLockInput] = useState<string>('');
+  const [doorLockError, setDoorLockError] = useState<boolean>(false);
 
-  const [padlockInput, setPadlockInput] = useState('');
-  const [padlockError, setPadlockError] = useState(false);
+  const [padlockInput, setPadlockInput] = useState<string>('');
+  const [padlockError, setPadlockError] = useState<boolean>(false);
 
-  const [cardInputs, setCardInputs] = useState(['', '', '', '', '']);
-  const [phase4Error, setPhase4Error] = useState(false);
-  const [selectedWord, setSelectedWord] = useState(null);
+  const [cardInputs, setCardInputs] = useState<string[]>(['', '', '', '', '']);
+  const [phase4Error, setPhase4Error] = useState<boolean>(false);
+  const [selectedWord, setSelectedWord] = useState<string | null>(null);
 
-  const [draggedWord, setDraggedWord] = useState(null);
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [draggedWord, setDraggedWord] = useState<string | null>(null);
+  const [dragPosition, setDragPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
-  const [teamName, setTeamName] = useState('');
-  const [submitStatus, setSubmitStatus] = useState('idle');
+  const [teamName, setTeamName] = useState<string>('');
+  const [submitStatus, setSubmitStatus] = useState<
+    'idle' | 'submitting' | 'success' | 'error'
+  >('idle');
 
   // ==========================================
   // 공통 유틸리티
   // ==========================================
   useEffect(() => {
-    let timerId;
+    let timerId: number | undefined;
     if (currentPhase >= 2 && currentPhase <= 4) {
-      timerId = setInterval(() => setCurrentTime(new Date()), 1000);
+      timerId = window.setInterval(() => setCurrentTime(new Date()), 1000);
     }
     return () => {
-      if (timerId) clearInterval(timerId);
+      if (timerId !== undefined) window.clearInterval(timerId);
     };
   }, [currentPhase]);
 
-  // 강제 전체화면 토글
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
 
-  const formatTime = (date) => {
+  const formatTime = (date: Date | null) => {
     if (!date) return '';
     return new Intl.DateTimeFormat('ko-KR', {
       timeZone: 'Asia/Seoul',
@@ -89,7 +93,7 @@ const App = () => {
     }).format(date);
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date: Date | null) => {
     if (!date) return '';
     return new Intl.DateTimeFormat('ko-KR', {
       timeZone: 'Asia/Seoul',
@@ -105,13 +109,16 @@ const App = () => {
   // ==========================================
   // 기능 로직
   // ==========================================
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImageBase64(reader.result.split(',')[1]);
-        setImagePreview(reader.result);
+        const result = reader.result;
+        if (typeof result === 'string') {
+          setImageBase64(result.split(',')[1]);
+          setImagePreview(result);
+        }
         setRecognizedNumber(null);
         setPhase1Status('idle');
       };
@@ -141,8 +148,9 @@ const App = () => {
     };
 
     try {
-      let attempt = 0,
-        result = null;
+      let attempt = 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let result: any = null;
       while (attempt < 5) {
         try {
           const response = await fetch(
@@ -186,7 +194,7 @@ const App = () => {
     }
   };
 
-  const handleKeypadClick = (num) => {
+  const handleKeypadClick = (num: string) => {
     if (doorLockInput.length < 10) {
       setDoorLockInput((prev) => prev + num);
       setDoorLockError(false);
@@ -201,7 +209,7 @@ const App = () => {
     }
   };
 
-  const handlePadlockClick = (num) => {
+  const handlePadlockClick = (num: string) => {
     if (padlockInput.length < 10) {
       setPadlockInput((prev) => prev + num);
       setPadlockError(false);
@@ -216,7 +224,7 @@ const App = () => {
     }
   };
 
-  const placeWordInSlot = (word, index) => {
+  const placeWordInSlot = (word: string, index: number) => {
     const newInputs = [...cardInputs];
     const existingIndex = newInputs.indexOf(word);
     if (existingIndex !== -1) newInputs[existingIndex] = '';
@@ -226,33 +234,39 @@ const App = () => {
     setPhase4Error(false);
   };
 
-  const handleDragStart = (e, word) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    word: string
+  ) => {
     e.dataTransfer.setData('word', word);
     setSelectedWord(word);
   };
-  const handleDrop = (e, index) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
     const word = e.dataTransfer.getData('word') || selectedWord || draggedWord;
     if (!word) return;
     placeWordInSlot(word, index);
   };
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const handleTouchStart = (e, word) => {
+  const handleTouchStart = (
+    e: React.TouchEvent<HTMLDivElement>,
+    word: string
+  ) => {
     setSelectedWord(word);
     setDraggedWord(word);
     const touch = e.touches[0];
     setDragPosition({ x: touch.clientX, y: touch.clientY });
   };
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!draggedWord) return;
     e.preventDefault();
     const touch = e.touches[0];
     setDragPosition({ x: touch.clientX, y: touch.clientY });
   };
-  const handleTouchEnd = (e) => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!draggedWord) return;
     const touch = e.changedTouches[0];
     const elementAtDrop = document.elementFromPoint(
@@ -273,7 +287,7 @@ const App = () => {
     setDraggedWord(null);
   };
 
-  const handleSlotClick = (index) => {
+  const handleSlotClick = (index: number) => {
     if (selectedWord) {
       placeWordInSlot(selectedWord, index);
     } else if (cardInputs[index]) {
@@ -324,7 +338,10 @@ const App = () => {
   // ==========================================
   // 테마 및 디자인 설정
   // ==========================================
-  const phaseThemes = {
+  const phaseThemes: Record<
+    number,
+    { bg: string; header: string; accent: string; badge: string }
+  > = {
     1: {
       bg: 'bg-sky-50',
       header: 'bg-blue-600',
@@ -356,10 +373,16 @@ const App = () => {
       badge: '',
     },
   };
-  const theme = phaseThemes[currentPhase];
-  const phaseEmoji = { 1: '', 2: '🫁 ', 3: '🧠 ', 4: '🫀 ', 5: '' };
+  const theme = phaseThemes[currentPhase] || phaseThemes[1];
+  const phaseEmoji: Record<number, string> = {
+    1: '',
+    2: '🫁 ',
+    3: '🧠 ',
+    4: '🫀 ',
+    5: '',
+  };
 
-  const getSlotClassName = (index) => {
+  const getSlotClassName = (index: number) => {
     const base =
       'absolute flex items-center justify-center text-[10px] sm:text-sm md:text-base lg:text-lg font-black rounded-md cursor-pointer transition-colors z-10';
     if (cardInputs[index])
@@ -370,7 +393,7 @@ const App = () => {
   };
 
   const renderHeader = (
-    phaseLabel,
+    phaseLabel: string,
     showClock = true,
     timeToDisplay = currentTime
   ) => (
@@ -567,10 +590,10 @@ const App = () => {
                 src="1.png"
                 alt="대순환(체순환)"
                 className="w-full h-auto block"
-                onError={(e) =>
-                  (e.target.src =
-                    'https://placehold.co/600x400/312e81/ffffff?text=Image+1.png')
-                }
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'https://placehold.co/600x400/312e81/ffffff?text=Image+1.png';
+                }}
               />
               <div
                 data-slot-index="0"
@@ -601,10 +624,10 @@ const App = () => {
                 src="2.png"
                 alt="소순환(폐순환)"
                 className="w-full h-auto block"
-                onError={(e) =>
-                  (e.target.src =
-                    'https://placehold.co/600x400/312e81/ffffff?text=Image+2.png')
-                }
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'https://placehold.co/600x400/312e81/ffffff?text=Image+2.png';
+                }}
               />
               <div
                 data-slot-index="2"
@@ -667,7 +690,6 @@ const App = () => {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-4 pt-20 sm:pt-24 space-y-4 sm:space-y-8 w-full max-w-3xl mx-auto h-full overflow-y-auto">
           <div className="text-center space-y-2 sm:space-y-3 bg-white/70 backdrop-blur-sm p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-orange-100 w-full">
-            {/* 중앙 상단 3단계 미션 배지 확인! */}
             <div
               className={`inline-flex items-center space-x-2 ${theme.badge} px-4 py-1.5 sm:py-2 rounded-full mb-1 sm:mb-2 text-xs sm:text-sm font-black border shadow-sm`}
             >
@@ -778,10 +800,10 @@ const App = () => {
                   src="3.jpg"
                   alt="폐용적 표"
                   className="max-w-full max-h-[25dvh] md:max-h-[35dvh] object-contain"
-                  onError={(e) =>
-                    (e.target.src =
-                      'https://placehold.co/1000x500/f8fafc/0f766e?text=Image+3.jpg')
-                  }
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      'https://placehold.co/1000x500/f8fafc/0f766e?text=Image+3.jpg';
+                  }}
                 />
               </div>
             </div>
@@ -797,10 +819,10 @@ const App = () => {
                   src="4.jpg"
                   alt="폐용적 그래프"
                   className="max-w-full max-h-[25dvh] md:max-h-[35dvh] object-contain"
-                  onError={(e) =>
-                    (e.target.src =
-                      'https://placehold.co/1000x600/ccfbf1/0f766e?text=Image+4.jpg')
-                  }
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      'https://placehold.co/1000x600/ccfbf1/0f766e?text=Image+4.jpg';
+                  }}
                 />
               </div>
             </div>
@@ -880,7 +902,7 @@ const App = () => {
     // ------------------------------------------
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-4 pt-20 space-y-6 w-full max-w-md mx-auto h-full overflow-y-auto">
-        <div className="text-center space-y-2 sm:space-y-3 bg-white/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-blue-50 backdrop-blur-sm w-full shrink-0">
+        <div className="text-center space-y-2 sm:space-y-3 bg-white/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-blue-50 backdrop-blur-sm w-full shrink-0 mt-8">
           <div
             className={`${theme.badge} inline-flex items-center space-x-2 px-4 py-1.5 sm:py-2 rounded-full mb-1 sm:mb-2 text-xs sm:text-sm font-black border shadow-sm`}
           >
@@ -994,7 +1016,6 @@ const App = () => {
   // ==========================================
   return (
     <div className="bg-[#0f172a] min-h-screen sm:p-2 md:p-4 flex items-center justify-center font-sans">
-      {/* 강제 전체화면 CSS 적용 */}
       <div
         className={`w-full ${
           isFullscreen
