@@ -373,17 +373,17 @@ const App = () => {
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 justify-items-center animate-in fade-in slide-in-from-bottom-8">
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] shadow-[0_10px_30px_rgba(33,44,102,0.3)] rounded-xl overflow-hidden border-[3px] sm:border-4 border-[#212c66] bg-[#3a478b]">
                <img src="1.png" alt="대순환(체순환)" className="w-full h-auto block" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/312e81/ffffff?text=Image+1.png'; }} />
-               {/* 위치 미세 조정 (좌측 이동 및 상하 조정) */}
-               <div data-slot-index="0" onDrop={(e) => handleDrop(e, 0)} onDragOver={handleDragOver} onClick={() => handleSlotClick(0)} className={`${getSlotClassName(0)} top-[43%] left-[34%] w-[28%] h-[14%]`}>{cardInputs[0]}</div>
-               <div data-slot-index="1" onDrop={(e) => handleDrop(e, 1)} onDragOver={handleDragOver} onClick={() => handleSlotClick(1)} className={`${getSlotClassName(1)} top-[74%] left-[53%] w-[28%] h-[14%]`}>{cardInputs[1]}</div>
+               {/* 위치 미세 조정 (크기 줄이고 우측으로 이동) */}
+               <div data-slot-index="0" onDrop={(e) => handleDrop(e, 0)} onDragOver={handleDragOver} onClick={() => handleSlotClick(0)} className={`${getSlotClassName(0)} top-[44%] left-[44%] w-[23%] h-[12%]`}>{cardInputs[0]}</div>
+               <div data-slot-index="1" onDrop={(e) => handleDrop(e, 1)} onDragOver={handleDragOver} onClick={() => handleSlotClick(1)} className={`${getSlotClassName(1)} top-[75%] left-[56%] w-[23%] h-[12%]`}>{cardInputs[1]}</div>
             </div>
 
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] shadow-[0_10px_30px_rgba(33,44,102,0.3)] rounded-xl overflow-hidden border-[3px] sm:border-4 border-[#212c66] bg-[#3a478b]">
                <img src="2.png" alt="소순환(폐순환)" className="w-full h-auto block" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/312e81/ffffff?text=Image+2.png'; }} />
-               {/* 위치 미세 조정 (좌우 이동 및 상하 조정) */}
-               <div data-slot-index="2" onDrop={(e) => handleDrop(e, 2)} onDragOver={handleDragOver} onClick={() => handleSlotClick(2)} className={`${getSlotClassName(2)} top-[43%] left-[34%] w-[28%] h-[14%]`}>{cardInputs[2]}</div>
-               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[74%] left-[28%] w-[28%] h-[14%]`}>{cardInputs[3]}</div>
-               <div data-slot-index="4" onDrop={(e) => handleDrop(e, 4)} onDragOver={handleDragOver} onClick={() => handleSlotClick(4)} className={`${getSlotClassName(4)} top-[74%] left-[63%] w-[28%] h-[14%]`}>{cardInputs[4]}</div>
+               {/* 위치 미세 조정 (크기 줄이고 우측으로 이동) */}
+               <div data-slot-index="2" onDrop={(e) => handleDrop(e, 2)} onDragOver={handleDragOver} onClick={() => handleSlotClick(2)} className={`${getSlotClassName(2)} top-[44%] left-[44%] w-[23%] h-[12%]`}>{cardInputs[2]}</div>
+               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[75%] left-[30%] w-[23%] h-[12%]`}>{cardInputs[3]}</div>
+               <div data-slot-index="4" onDrop={(e) => handleDrop(e, 4)} onDragOver={handleDragOver} onClick={() => handleSlotClick(4)} className={`${getSlotClassName(4)} top-[75%] left-[65%] w-[23%] h-[12%]`}>{cardInputs[4]}</div>
             </div>
           </div>
 
