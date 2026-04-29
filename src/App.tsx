@@ -49,6 +49,28 @@ const App = () => {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle'); 
 
   // ==========================================
+  // 폭죽(Confetti) 효과 함수
+  // ==========================================
+  const fireConfetti = () => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js';
+    script.onload = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const myConfetti = (window as any).confetti;
+      if (myConfetti) {
+        myConfetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6'],
+          zIndex: 10000
+        });
+      }
+    };
+    document.body.appendChild(script);
+  };
+
+  // ==========================================
   // 공통 유틸리티
   // ==========================================
   useEffect(() => {
@@ -98,8 +120,9 @@ const App = () => {
     setIsProcessing(true);
     setPhase1Status('idle');
 
-    // 시스템이 검사하는 듯한 몰입감을 주기 위한 가짜 딜레이 (1.2초)
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    // 시스템이 검사하는 듯한 긴장감을 주기 위한 랜덤 딜레이 (3초 ~ 5초)
+    const randomDelay = Math.floor(Math.random() * 2000) + 3000;
+    await new Promise(resolve => setTimeout(resolve, randomDelay));
 
     setIsProcessing(false);
     
@@ -212,6 +235,7 @@ const App = () => {
         await new Promise(r => setTimeout(r, 1000));
       }
       setSubmitStatus('success');
+      fireConfetti(); // 성공 시 폭죽 애니메이션 실행!
     } catch (error) {
       setSubmitStatus('error');
     }
@@ -274,8 +298,8 @@ const App = () => {
     // ------------------------------------------
     if (currentPhase === 5) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center p-4 pt-24 space-y-6 w-full max-w-md mx-auto h-full overflow-y-auto">
-          <div className="bg-white border-4 border-amber-300 rounded-[2rem] p-6 sm:p-8 shadow-xl w-full text-center animate-in zoom-in-95 duration-500 max-h-full">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 pt-24 space-y-6 w-full max-w-md mx-auto h-full overflow-y-auto relative">
+          <div className="bg-white border-4 border-amber-300 rounded-[2rem] p-6 sm:p-8 shadow-xl w-full text-center animate-in zoom-in-95 duration-500 max-h-full z-10">
             <Unlock className="w-16 h-16 sm:w-24 sm:h-24 text-amber-500 mx-auto mb-4 sm:mb-6" />
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-amber-600 mb-2">방탈출 성공!</h2>
             <p className="text-slate-600 font-bold mb-6 sm:mb-8 text-sm sm:text-base">BODY ESCAPE의 모든 관문을 통과했습니다.</p>
@@ -299,10 +323,11 @@ const App = () => {
                 {submitStatus === 'error' && <p className="text-red-500 text-xs sm:text-sm font-bold mt-2 flex justify-center items-center"><AlertCircle className="w-4 h-4 mr-1"/> 전송 실패. 네트워크를 확인하세요.</p>}
               </div>
             ) : (
-              <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 sm:p-6 flex flex-col items-center animate-in fade-in">
-                <Check className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-500 mb-2 sm:mb-3" />
-                <p className="font-black text-lg sm:text-xl text-emerald-700">기록 제출 완료!</p>
-                <p className="text-xs sm:text-sm text-emerald-600 font-bold mt-2 bg-white px-3 py-1 rounded-full border border-emerald-200">이 화면을 선생님께 보여주세요.</p>
+              <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 sm:p-6 flex flex-col items-center animate-in fade-in zoom-in duration-500 shadow-inner">
+                <Check className="w-12 h-12 sm:w-16 sm:h-16 text-emerald-500 mb-2 sm:mb-3 animate-bounce" />
+                <p className="font-black text-2xl sm:text-3xl text-emerald-700 mb-1">🎉 미션 완벽 완수! 🎉</p>
+                <p className="font-bold text-sm sm:text-base text-emerald-600 mb-4">최종 기록 제출이 완료되었습니다.</p>
+                <p className="text-xs sm:text-sm text-emerald-600 font-bold bg-white px-4 py-2 rounded-full border border-emerald-200 shadow-sm">선생님께 이 화면을 보여주세요!</p>
               </div>
             )}
           </div>
@@ -348,15 +373,15 @@ const App = () => {
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 justify-items-center animate-in fade-in slide-in-from-bottom-8">
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] shadow-[0_10px_30px_rgba(33,44,102,0.3)] rounded-xl overflow-hidden border-[3px] sm:border-4 border-[#212c66] bg-[#3a478b]">
                <img src="1.png" alt="대순환(체순환)" className="w-full h-auto block" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/312e81/ffffff?text=Image+1.png'; }} />
-               <div data-slot-index="0" onDrop={(e) => handleDrop(e, 0)} onDragOver={handleDragOver} onClick={() => handleSlotClick(0)} className={`${getSlotClassName(0)} top-[38.5%] left-[45%] w-[26%] h-[19%]`}>{cardInputs[0]}</div>
-               <div data-slot-index="1" onDrop={(e) => handleDrop(e, 1)} onDragOver={handleDragOver} onClick={() => handleSlotClick(1)} className={`${getSlotClassName(1)} top-[68.5%] left-[55.5%] w-[26%] h-[19%]`}>{cardInputs[1]}</div>
+               <div data-slot-index="0" onDrop={(e) => handleDrop(e, 0)} onDragOver={handleDragOver} onClick={() => handleSlotClick(0)} className={`${getSlotClassName(0)} top-[41%] left-[44.5%] w-[28%] h-[14%]`}>{cardInputs[0]}</div>
+               <div data-slot-index="1" onDrop={(e) => handleDrop(e, 1)} onDragOver={handleDragOver} onClick={() => handleSlotClick(1)} className={`${getSlotClassName(1)} top-[71%] left-[53%] w-[28%] h-[14%]`}>{cardInputs[1]}</div>
             </div>
 
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] shadow-[0_10px_30px_rgba(33,44,102,0.3)] rounded-xl overflow-hidden border-[3px] sm:border-4 border-[#212c66] bg-[#3a478b]">
                <img src="2.png" alt="소순환(폐순환)" className="w-full h-auto block" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/312e81/ffffff?text=Image+2.png'; }} />
-               <div data-slot-index="2" onDrop={(e) => handleDrop(e, 2)} onDragOver={handleDragOver} onClick={() => handleSlotClick(2)} className={`${getSlotClassName(2)} top-[38.5%] left-[45%] w-[26%] h-[19%]`}>{cardInputs[2]}</div>
-               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[68.5%] left-[26%] w-[26%] h-[19%]`}>{cardInputs[3]}</div>
-               <div data-slot-index="4" onDrop={(e) => handleDrop(e, 4)} onDragOver={handleDragOver} onClick={() => handleSlotClick(4)} className={`${getSlotClassName(4)} top-[68.5%] left-[64%] w-[26%] h-[19%]`}>{cardInputs[4]}</div>
+               <div data-slot-index="2" onDrop={(e) => handleDrop(e, 2)} onDragOver={handleDragOver} onClick={() => handleSlotClick(2)} className={`${getSlotClassName(2)} top-[41%] left-[44.5%] w-[28%] h-[14%]`}>{cardInputs[2]}</div>
+               <div data-slot-index="3" onDrop={(e) => handleDrop(e, 3)} onDragOver={handleDragOver} onClick={() => handleSlotClick(3)} className={`${getSlotClassName(3)} top-[71%] left-[27%] w-[28%] h-[14%]`}>{cardInputs[3]}</div>
+               <div data-slot-index="4" onDrop={(e) => handleDrop(e, 4)} onDragOver={handleDragOver} onClick={() => handleSlotClick(4)} className={`${getSlotClassName(4)} top-[71%] left-[62%] w-[28%] h-[14%]`}>{cardInputs[4]}</div>
             </div>
           </div>
 
