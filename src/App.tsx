@@ -96,12 +96,12 @@ const App = () => {
     setRecognizedNumber(null);
 
     const apiKey = ""; 
-    const prompt = "이 사진에 있는 숫자를 읽어주세요. 7세그먼트 디스플레이(전자시계 숫자 모양) 또는 손글씨일 수 있습니다. 불필요한 설명 없이 오직 인식된 숫자만 응답하세요.";
+    // 프롬프트 대폭 강화: 배경 무시, 어떠한 형태든 숫자를 찾으라고 지시
+    const prompt = "이 사진에서 학생들이 작성한, 혹은 조합한 4자리 숫자를 반드시 찾아주세요. 7세그먼트(전자시계 모양), 손글씨, 거꾸로 된 글씨 등 형태에 상관없이 찾아야 합니다. 주변 배경, 빛 번짐, 다른 글자는 모두 무시하고, 사진 중앙에 위치한 핵심 숫자 4자리만 읽어주세요.";
     const payload = { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] }] };
 
     try {
       let attempt = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let result: any = null;
       while (attempt < 5) {
         try {
@@ -118,10 +118,14 @@ const App = () => {
         }
       }
 
-      const extractedNumber = result?.candidates?.[0]?.content?.parts?.[0]?.text?.replace(/[^0-9]/g, '');
-      setRecognizedNumber(extractedNumber || "인식 실패");
+      // 결과값 처리 로직 강화: AI의 응답에서 숫자만 모두 추출
+      const aiResponseText = result?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const extractedNumbers = aiResponseText.match(/\d+/g)?.join('') || "";
       
-      if (extractedNumber === PHASE1_TARGET) {
+      setRecognizedNumber(extractedNumbers || "숫자 판독 실패");
+      
+      // 추출된 숫자에 정답(6351)이 '포함'되어 있기만 해도 정답 처리 (예: "결과는 6351입니다" -> "6351" 통과)
+      if (extractedNumbers.includes(PHASE1_TARGET)) {
         setCurrentTime(new Date());
         setCurrentPhase(2);
       } else {
