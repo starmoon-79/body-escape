@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, ChangeEvent, DragEvent, TouchEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type { ChangeEvent, DragEvent, TouchEvent } from 'react';
 import { Camera, XCircle, Loader2, ScanLine, Clock, Flag, Lock, Unlock, Delete, Send, Check, KeyRound, AlertCircle, Maximize, Minimize } from 'lucide-react';
 
 const App = () => {
@@ -260,7 +261,7 @@ const App = () => {
     return `${base} bg-white/20 border sm:border-2 border-dashed border-white/50 hover:bg-white/30`;
   };
 
-  const renderHeader = (phaseLabel: string, showClock = true, timeToDisplay = currentTime) => (
+  const renderHeader = (phaseLabel: string, showClock = true, timeToDisplay: Date | null = currentTime) => (
     <div className="absolute top-0 left-0 w-full p-3 sm:p-4 flex justify-between items-start z-[100] bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
       <div className={`${theme.header} text-white px-3 sm:px-4 py-2 rounded-xl font-black text-sm sm:text-lg lg:text-xl flex items-center shadow-md animate-in slide-in-from-left-4 fade-in`}>
         <Flag className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-1.5 sm:mr-2 opacity-90 hidden sm:block" /> {phaseEmoji[currentPhase]}{phaseLabel}
